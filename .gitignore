@@ -1,0 +1,71 @@
+# Visual Studio / .NET
+.vs/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.ilk
+*.log
+*.obj
+*.pch
+*.pdb
+*.ipch
+*.aps
+*.iobj
+*.iui
+*.idb
+*.ncb
+*.sdf
+*.tlog
+*.lastbuildstate
+*.dbmdl
+*.opendb
+*.opensdf
+*.psess
+*.vsp
+*.vspx
+*.tmp
+
+# Build output
+bin/
+obj/
+
+# Publish output / distribution
+dist/
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Visual Studio Code
+.vscode/
+
+# User-specific files
+*_ReSharper.*
+_ReSharper*
+*.DotSettings.user
+
+# Logs
+*.log
+
+# Arduino temporary files / build folders
+**/build/
+**/libraries/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Windows Image Acquisition files
+*.wim
+
+# Backup files
+*.bak
+*.tmp
+*~
