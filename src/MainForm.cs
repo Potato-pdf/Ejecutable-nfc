@@ -89,10 +89,10 @@ public class MainForm : Form
             BackColor   = Color.Transparent
         };
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 82f));   // Arduino
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 60f));   // Backend
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));   // Arduino
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));   // Backend
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));   // Logs
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 96f));   // Register
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));   // Register
         Controls.Add(root);
 
         root.Controls.Add(BuildArduinoGroup(),  0, 0);
@@ -279,13 +279,14 @@ public class MainForm : Form
             Dock = DockStyle.Fill,
             Padding = new Padding(8, 6, 8, 6),
             ColumnCount = 3,
-            RowCount = 2
+            RowCount = 2,
+            AutoSize = true
         };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170f));
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34f));
-        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         grp.Controls.Add(layout);
 
         layout.Controls.Add(MakeFlowLabel("Última UID leída:"), 0, 0);

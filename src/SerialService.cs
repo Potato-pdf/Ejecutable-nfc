@@ -35,6 +35,11 @@ public class SerialService
             _buffer = string.Empty;
             return true;
         }
+        catch (UnauthorizedAccessException)
+        {
+            LogMessage?.Invoke($"Acceso denegado en {portName}. Cierra el Monitor Serial de Arduino IDE o cualquier otra aplicación que use el puerto y vuelve a intentar.");
+            return false;
+        }
         catch (Exception ex)
         {
             LogMessage?.Invoke($"Error al abrir {portName}: {ex.Message}");

@@ -135,7 +135,7 @@ curl -X POST https://backend-nfc-lo1t.onrender.com/api/scan \
 ```bash
 curl -X POST https://backend-nfc-lo1t.onrender.com/api/register \
   -H "Content-Type: application/json" \
-  -d '{"uid": "NUEVO-LLAVERO-XYZ"}'
+  -d '{"uid": "04:40:26:22:91:13:90"}'
 ```
 
 ---
