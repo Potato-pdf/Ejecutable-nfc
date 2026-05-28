@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.IO.Ports;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace EjecutableNFC;
@@ -66,6 +67,7 @@ public class MainForm : Form
         MinimumSize     = new Size(660, 580);
         StartPosition   = FormStartPosition.CenterScreen;
         Font            = new Font("Segoe UI", 9f);
+        AutoScaleMode   = AutoScaleMode.Dpi;
         BackColor       = Color.FromArgb(245, 246, 250);
 
         // Status strip — must be added before the fill panel
@@ -112,56 +114,84 @@ public class MainForm : Form
     private GroupBox BuildArduinoGroup()
     {
         var grp = MakeGroupBox("Conexión Arduino");
-        var pnl = new Panel { Dock = DockStyle.Fill };
-        grp.Controls.Add(pnl);
+        var layout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(8, 6, 8, 6),
+            ColumnCount = 8,
+            RowCount = 1
+        };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130f));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90f));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 38f));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120f));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        grp.Controls.Add(layout);
 
-        const int y = 24;
+        var lblPort = MakeFlowLabel("Puerto:");
+        layout.Controls.Add(lblPort, 0, 0);
 
-        pnl.Controls.Add(MakeLabel("Puerto:", 5, y + 3));
-        _cmbPort = new ComboBox { Location = new Point(60, y), Width = 88,
-                                  DropDownStyle = ComboBoxStyle.DropDownList };
-        pnl.Controls.Add(_cmbPort);
+        _cmbPort = new ComboBox
+        {
+            Dock = DockStyle.Fill,
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            DropDownWidth = 180,
+            IntegralHeight = false
+        };
+        _cmbPort.DropDown += (_, _) => RefreshPorts();
+        layout.Controls.Add(_cmbPort, 1, 0);
 
-        pnl.Controls.Add(MakeLabel("Baudios:", 158, y + 3));
-        _cmbBaud = new ComboBox { Location = new Point(214, y), Width = 85,
-                                  DropDownStyle = ComboBoxStyle.DropDownList };
+        var lblBaud = MakeFlowLabel("Baudios:");
+        layout.Controls.Add(lblBaud, 2, 0);
+
+        _cmbBaud = new ComboBox
+        {
+            Dock = DockStyle.Fill,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
         _cmbBaud.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200" });
         _cmbBaud.SelectedIndex = 0;
-        pnl.Controls.Add(_cmbBaud);
+        layout.Controls.Add(_cmbBaud, 3, 0);
 
         _btnRefreshPorts = new Button
         {
             Text      = "↻",
-            Location  = new Point(309, y),
-            Size      = new Size(30, 26),
+            Dock      = DockStyle.Fill,
+            Margin    = new Padding(6, 0, 6, 0),
             FlatStyle = FlatStyle.Flat,
             Font      = new Font("Segoe UI", 11f)
         };
         _btnRefreshPorts.Click += (_, _) => RefreshPorts();
-        pnl.Controls.Add(_btnRefreshPorts);
+        layout.Controls.Add(_btnRefreshPorts, 4, 0);
 
-        _btnConnect = MakeButton("Conectar", new Point(349, y), new Size(108, 26),
+        _btnConnect = MakeButton("Conectar", Point.Empty, new Size(108, 26),
                                  Color.FromArgb(0, 120, 215));
+        _btnConnect.Dock = DockStyle.Fill;
         _btnConnect.Click += OnConnectClicked;
-        pnl.Controls.Add(_btnConnect);
+        layout.Controls.Add(_btnConnect, 5, 0);
 
         _lblStatusDot = new Label
         {
             Text     = "●",
-            Location = new Point(470, y + 1),
+            Dock     = DockStyle.Fill,
+            TextAlign = ContentAlignment.MiddleCenter,
             AutoSize = true,
             ForeColor = Color.Red,
             Font     = new Font("Segoe UI", 14f)
         };
-        pnl.Controls.Add(_lblStatusDot);
+        layout.Controls.Add(_lblStatusDot, 6, 0);
 
         _lblStatusText = new Label
         {
             Text     = "Desconectado",
-            Location = new Point(492, y + 5),
+            Dock     = DockStyle.Fill,
+            TextAlign = ContentAlignment.MiddleLeft,
             AutoSize = true
         };
-        pnl.Controls.Add(_lblStatusText);
+        layout.Controls.Add(_lblStatusText, 7, 0);
 
         return grp;
     }
@@ -171,26 +201,33 @@ public class MainForm : Form
     private GroupBox BuildBackendGroup()
     {
         var grp = MakeGroupBox("Configuración Backend");
-        var pnl = new Panel { Dock = DockStyle.Fill };
-        grp.Controls.Add(pnl);
+        var layout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(8, 6, 8, 6),
+            ColumnCount = 3,
+            RowCount = 1
+        };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 84f));
+        grp.Controls.Add(layout);
 
-        const int y = 22;
-
-        pnl.Controls.Add(MakeLabel("URL:", 5, y + 3));
+        layout.Controls.Add(MakeFlowLabel("URL:"), 0, 0);
 
         _txtBackendUrl = new TextBox
         {
             Text     = "https://backend-nfc-lo1t.onrender.com",
-            Location = new Point(38, y),
-            Width    = 520,
-            Anchor   = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top
+            Dock     = DockStyle.Fill,
+            Margin   = new Padding(6, 0, 8, 0)
         };
-        pnl.Controls.Add(_txtBackendUrl);
+        layout.Controls.Add(_txtBackendUrl, 1, 0);
 
-        _btnTestBackend = MakeButton("Probar", new Point(566, y), new Size(70, 26),
+        _btnTestBackend = MakeButton("Probar", Point.Empty, new Size(70, 26),
                                      Color.FromArgb(39, 160, 100));
+        _btnTestBackend.Dock = DockStyle.Fill;
         _btnTestBackend.Click += OnTestBackendClicked;
-        pnl.Controls.Add(_btnTestBackend);
+        layout.Controls.Add(_btnTestBackend, 2, 0);
 
         return grp;
     }
@@ -215,7 +252,6 @@ public class MainForm : Form
         };
         _btnClearLogs.Click += (_, _) => _rtbLogs.Clear();
         topBar.Controls.Add(_btnClearLogs);
-        outer.Controls.Add(topBar);
 
         _rtbLogs = new RichTextBox
         {
@@ -228,6 +264,7 @@ public class MainForm : Form
             ScrollBars  = RichTextBoxScrollBars.Vertical
         };
         outer.Controls.Add(_rtbLogs);
+        outer.Controls.Add(topBar);
 
         return grp;
     }
@@ -237,39 +274,49 @@ public class MainForm : Form
     private GroupBox BuildRegisterGroup()
     {
         var grp = MakeGroupBox("Registro de Nueva Tarjeta NFC");
-        var pnl = new Panel { Dock = DockStyle.Fill };
-        grp.Controls.Add(pnl);
+        var layout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(8, 6, 8, 6),
+            ColumnCount = 3,
+            RowCount = 2
+        };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170f));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34f));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+        grp.Controls.Add(layout);
 
-        const int y = 24;
-
-        pnl.Controls.Add(MakeLabel("Última UID leída:", 5, y + 3));
+        layout.Controls.Add(MakeFlowLabel("Última UID leída:"), 0, 0);
 
         _txtLastUid = new TextBox
         {
-            Location  = new Point(122, y),
-            Width     = 210,
+            Dock      = DockStyle.Fill,
             ReadOnly  = true,
             Text      = "(ninguna)",
             BackColor = Color.FromArgb(236, 240, 241),
-            Font      = new Font("Consolas", 9.5f)
+            Font      = new Font("Consolas", 9.5f),
+            Margin    = new Padding(6, 0, 8, 0)
         };
-        pnl.Controls.Add(_txtLastUid);
+        layout.Controls.Add(_txtLastUid, 1, 0);
 
-        _btnRegister = MakeButton("Registrar Tarjeta", new Point(342, y - 1),
+        _btnRegister = MakeButton("Registrar Tarjeta", Point.Empty,
                                   new Size(150, 28), Color.FromArgb(39, 174, 96));
+        _btnRegister.Dock = DockStyle.Fill;
         _btnRegister.Enabled = false;
         _btnRegister.Click  += OnRegisterClicked;
-        pnl.Controls.Add(_btnRegister);
+        layout.Controls.Add(_btnRegister, 2, 0);
 
         _lblRegisterHint = new Label
         {
             Text      = "⚠  Acerca una tarjeta NFC al lector Arduino para habilitar el registro.",
-            Location  = new Point(5, 60),
             AutoSize  = true,
             ForeColor = Color.FromArgb(127, 140, 141),
             Font      = new Font("Segoe UI", 8.5f, FontStyle.Italic)
         };
-        pnl.Controls.Add(_lblRegisterHint);
+        layout.SetColumnSpan(_lblRegisterHint, 3);
+        layout.Controls.Add(_lblRegisterHint, 0, 1);
 
         return grp;
     }
@@ -386,15 +433,28 @@ public class MainForm : Form
     {
         string? selected = _cmbPort.SelectedItem as string;
         _cmbPort.Items.Clear();
-        var ports = SerialService.GetAvailablePorts();
+        var ports = SerialService.GetAvailablePorts()
+            .OrderBy(GetPortSortKey)
+            .ToArray();
         _cmbPort.Items.AddRange(ports);
 
         if (selected != null && _cmbPort.Items.Contains(selected))
             _cmbPort.SelectedItem = selected;
         else if (ports.Length > 0)
-            _cmbPort.SelectedIndex = 0;
+            _cmbPort.SelectedItem = ports.FirstOrDefault(p => string.Equals(p, "COM10", StringComparison.OrdinalIgnoreCase)) ?? ports[0];
 
         AppendLog($"Puertos COM disponibles: {(ports.Length > 0 ? string.Join(", ", ports) : "ninguno detectado")}", LogLevel.Info);
+    }
+
+    private static int GetPortSortKey(string portName)
+    {
+        if (portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) &&
+            int.TryParse(portName[3..], out int portNumber))
+        {
+            return portNumber;
+        }
+
+        return int.MaxValue;
     }
 
     private void SetConnectedState(bool connected)
@@ -487,6 +547,15 @@ public class MainForm : Form
         Location = new Point(x, y),
         AutoSize = true,
         Font     = new Font("Segoe UI", 9f)
+    };
+
+    private static Label MakeFlowLabel(string text) => new()
+    {
+        Text = text,
+        AutoSize = true,
+        Anchor = AnchorStyles.Left,
+        Margin = new Padding(0, 4, 6, 0),
+        Font = new Font("Segoe UI", 9f)
     };
 
     private static Button MakeButton(string text, Point location, Size size, Color backColor)
